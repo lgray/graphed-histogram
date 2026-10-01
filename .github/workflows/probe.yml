@@ -10,11 +10,17 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: lgray/graphed-histogram
+          ref: m69b
+          path: repo
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.py }}
-      - run: pip install -q "histserv==0.2.1" psutil
       - run: |
-          echo "HOST $(uname -m) nproc=$(nproc) thp=$(cat /sys/kernel/mm/transparent_hugepage/enabled) $(python -VV | head -1)"
+          pip install -q "graphed[awkward,numpy]==0.0.6" graphed-executors -e "./repo[dev,histserv]" psutil
+          sudo mkdir -p /p && sudo cp announce_db8fb0a.py /p/
+      - run: |
+          echo "HOST $(uname -m) nproc=$(nproc) $(python -VV | head -1) pandas=$(python -c 'import pandas; print(pandas.__version__)')"
           python probe_histserv_memory.py
-          python probe_histserv_memory.py connections

@@ -1,0 +1,20 @@
+name: m69b histserv memory probe
+on: push
+jobs:
+  probe:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, ubuntu-24.04-arm]
+        py: ["3.11", "3.12", "3.13", "3.14"]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.py }}
+      - run: pip install -q "histserv==0.2.1" psutil
+      - run: |
+          echo "HOST $(uname -m) nproc=$(nproc) thp=$(cat /sys/kernel/mm/transparent_hugepage/enabled) $(python -VV | head -1)"
+          python probe_histserv_memory.py
+          python probe_histserv_memory.py connections
